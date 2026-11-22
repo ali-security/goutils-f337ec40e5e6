@@ -1,13 +1,19 @@
 language: go
 
 go:
-  - 1.6
-  - 1.7
-  - 1.8
-  - tip
+  - 1.6.4
+  - 1.7.6
+  - 1.8.7
+  - 1.11.x
+
+# Stdlib-only package: the default `go get -v -t ./...` install step refuses to run
+# on pre-module Go (1.6-1.8) because Travis no longer clones into GOPATH.
+install:
+  - go build -v .
 
 script:
-  - go test -v
+  - bash -o pipefail -c 'go test -v 2>&1 | tee /tmp/go-test.log'
+  - echo "go test summary - passed=$(grep -c -- '--- PASS' /tmp/go-test.log) failed=$(grep -c -- '--- FAIL' /tmp/go-test.log) skipped=$(grep -c -- '--- SKIP' /tmp/go-test.log)"
 
 notifications:
   webhooks:
